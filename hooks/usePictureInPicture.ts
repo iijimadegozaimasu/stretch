@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { resolveStatusText, resolveTimerText } from "@/lib/display";
 import type { StretchConfig, TimerState } from "@/lib/types";
 
+const PIP_FPS = 10;
+
 interface PiPColors {
   bg: string;
   text: string;
@@ -24,10 +26,6 @@ export interface PictureInPictureApi {
   draw: (state: TimerState) => void;
 }
 
-/**
- * canvas に現在の状態を描画し、その captureStream を <video> 経由で
- * Picture-in-Picture 表示するためのフック。
- */
 export function usePictureInPicture(
   config: StretchConfig,
 ): PictureInPictureApi {
@@ -78,7 +76,7 @@ export function usePictureInPicture(
       if (document.pictureInPictureElement) {
         await document.exitPictureInPicture();
       } else {
-        const stream = canvas.captureStream(10); // 10fps
+        const stream = canvas.captureStream(PIP_FPS);
         video.srcObject = stream;
         await video.play();
         await video.requestPictureInPicture();
@@ -88,7 +86,6 @@ export function usePictureInPicture(
     }
   }, []);
 
-  // PiP の開始／終了を監視してボタン表示を切り替える
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
